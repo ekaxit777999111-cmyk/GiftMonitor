@@ -177,7 +177,11 @@ async function loadGifts() {
     }
 
     for (const event of data.events) {
-      if (event.type === "gift.upgrades_added") {
+      if (
+        event.type === "model.rarity_changed" ||
+        event.type === "backdrop.rarity_changed" ||
+        event.type === "symbol.rarity_changed"
+      ) {
         gifts.push(event);
       }
     }
