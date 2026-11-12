@@ -4,34 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GiftMonitor</title>
+
 <style>
 *{box-sizing:border-box}
+
 body{
- margin:0;background:#0b0914;color:white;
- font-family:Arial,sans-serif;padding:22px;
+ margin:0;
+ background:#0b0914;
+ color:white;
+ font-family:Arial,sans-serif;
+ padding:22px;
 }
+
 header{display:flex;align-items:center;gap:12px}
 .logo{font-size:35px}
 h1{font-size:25px;margin:0}
 .sub{color:#aaa;font-size:13px;margin-top:5px}
+
 .card{
- background:#171326;border:1px solid #30244b;
- border-radius:17px;padding:18px;margin-top:20px;
+ background:#171326;
+ border:1px solid #30244b;
+ border-radius:17px;
+ padding:18px;
+ margin-top:20px;
 }
+
 h2{font-size:18px;margin:0 0 14px}
+
 input{
- width:100%;padding:14px;border-radius:10px;
- background:#0d0a18;border:1px solid #40315c;
- color:white;font-size:15px;outline:none;
+ width:100%;
+ padding:14px;
+ border-radius:10px;
+ background:#0d0a18;
+ border:1px solid #40315c;
+ color:white;
+ font-size:15px;
+ outline:none;
 }
+
 button{
- width:100%;padding:14px;border:0;border-radius:10px;
- background:#874cff;color:white;font-weight:bold;
- font-size:15px;margin-top:12px;cursor:pointer;
+ width:100%;
+ padding:14px;
+ border:0;
+ border-radius:10px;
+ background:#874cff;
+ color:white;
+ font-weight:bold;
+ font-size:15px;
+ margin-top:12px;
+ cursor:pointer;
 }
+
 .stats{display:flex;gap:10px}
-.stat{flex:1;background:#211a35;padding:14px;border-radius:12px}
-.number{font-size:23px;font-weight:bold;color:#b68cff}
+.stat{
+ flex:1;
+ background:#211a35;
+ padding:14px;
+ border-radius:12px;
+}
+
+.number{
+ font-size:23px;
+ font-weight:bold;
+ color:#b68cff;
+}
+
 .small{font-size:12px;color:#aaa;margin-top:5px}
 .gift{border-top:1px solid #30244b;padding:14px 0}
 .empty{color:#aaa;font-size:13px;text-align:center;padding:15px}
@@ -39,199 +76,132 @@ nav{display:flex;justify-content:space-around;margin-top:25px;color:#aaa}
 nav span{font-size:12px;text-align:center}
 </style>
 </head>
+
 <body>
+
 <header>
-<div class="logo">🎁</div>
-<div>
-<h1>GiftMonitor</h1>
-<div class="sub">Telegram Gift Tracker</div>
-</div>
+ <div class="logo">🎁</div>
+ <div>
+  <h1>GiftMonitor</h1>
+  <div class="sub">Telegram Gift Tracker</div>
+ </div>
 </header>
 
 <div class="card">
-<h2>⚡ Мониторинг подарков</h2>
-<div class="stats">
-<div class="stat">
-<div class="number" id="total">0</div>
-<div class="small">Найдено подарков</div>
-</div>
-<div class="stat">
-<div class="number">ON</div>
-<div class="small">Статус приложения</div>
-</div>
-</div>
-</div>
-
-<div class="card">
-<h2>🔍 Поиск подарка</h2>
-<input id="search" placeholder="Введи название или ID подарка">
-<button onclick="searchGift()">Найти подарок</button>
-<div id="results" class="empty">
-Ожидание данных мониторинга...
-</div>
+ <h2>⚡ Мониторинг подарков</h2>
+ <div class="stats">
+  <div class="stat">
+   <div class="number" id="total">0</div>
+   <div class="small">Найдено событий</div>
+  </div>
+  <div class="stat">
+   <div class="number" id="status">...</div>
+   <div class="small">Статус приложения</div>
+  </div>
+ </div>
 </div>
 
 <div class="card">
-<h2>🆕 Последние улучшения</h2>
-<div id="latest" class="empty">
-Пока нет найденных подарков
-</div>
+ <h2>🔍 Поиск подарка</h2>
+ <input id="search" placeholder="Введи название или ID подарка">
+ <button onclick="searchGift()">Найти подарок</button>
+ <div id="results" class="empty">
+  Ожидание данных мониторинга...
+ </div>
 </div>
 
 <div class="card">
-<h2>👑 Premium</h2>
-<p class="sub">Расширенный мониторинг и уведомления</p>
-<button onclick="alert('Premium скоро появится!')">
-Подробнее о Premium
-</button>
+ <h2>🆕 Последние улучшения</h2>
+ <div id="latest" class="empty">
+  Подключение к API...
+ </div>
+</div>
+
+<div class="card">
+ <h2>👑 Premium</h2>
+ <p class="sub">Расширенный мониторинг и уведомления</p>
+ <button onclick="alert('Premium скоро появится!')">
+  Подробнее о Premium
+ </button>
 </div>
 
 <nav>
-<span>🏠<br>Главная</span>
-<span>🔍<br>Поиск</span>
-<span>🔔<br>Уведомления</span>
-<span>👤<br>Профиль</span>
+ <span>🏠<br>Главная</span>
+ <span>🔍<br>Поиск</span>
+ <span>🔔<br>Уведомления</span>
+ <span>👤<br>Профиль</span>
 </nav>
+
 <script>
 const API = "https://api.changes.tg/changes";
+
 let gifts = [];
 let cursor = "0";
 let loading = false;
+
 function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&": "&",
-    "<": "<",
-    ">": ">",
-    '"': """,
-    "'": "'"
-  })[c]);
+ return String(value ?? "").replace(/[&<>"']/g, function(c) {
+  return {
+   "&": "&amp;",
+   "<": "&lt;",
+   ">": "&gt;",
+   '"': "&quot;",
+   "'": "&#039;"
+  }[c];
+ });
 }
+
 function getTimestamp(value) {
-  if (!value) return 0;
-  
-  const n = Number(value);
- 
-  if (Number.isFinite(n)) {
-    return n < 100000000000 ? n * 1000 : n;
-  }
-  const parsed = new Date(value).getTime();
-  return Number.isFinite(parsed) ? parsed : 0;
+ if (!value) return 0;
+
+ const n = Number(value);
+
+ if (Number.isFinite(n)) {
+  return n < 100000000000 ? n * 1000 : n;
+ }
+
+ const parsed = new Date(value).getTime();
+
+ return Number.isFinite(parsed) ? parsed : 0;
 }
+
 function getTime(value) {
-  const timestamp = getTimestamp(value);
- 
-  return timestamp
-    ? new Date(timestamp).toLocaleString("ru-RU")
-    : "Время неизвестно";
+ const timestamp = getTimestamp(value);
+
+ return timestamp
+  ? new Date(timestamp).toLocaleString("ru-RU")
+  : "Время неизвестно";
 }
- 
+
 function renderGifts() {
-const latest = document.getElementById("latest");
-const total = document.getElementById("total");
-gifts.sort((a, b) =>
-getTimestamp(b.at) - getTimestamp(a.at)
-);
-total.textContent = gifts.length;
-if (!gifts.length) {
-latest.textContent = "Пока нет найденных подарков";
-return;
-}
-latest.innerHTML = gifts.slice(0, 30).map((g, index) => {
-let item = "Улучшение подарка";
-if (g.type === "model.rarity_changed")
-  item = "Модель: " + (g.model || "Неизвестно");
+ const latest = document.getElementById("latest");
+ const total = document.getElementById("total");
 
-if (g.type === "backdrop.rarity_changed")
-  item = "Фон: " + (g.backdrop || "Неизвестно");
+ gifts.sort(function(a, b) {
+  return getTimestamp(b.at) - getTimestamp(a.at);
+ });
 
-if (g.type === "symbol.rarity_changed")
-  item = "Символ: " + (g.symbol || "Неизвестно");
+ total.textContent = gifts.length;
 
-return `
-  <div class="gift">
-    <b>￼{escapeHTML(g.gift || "Неизвестный подарок")}</b>
-    <div class="small">ID: ${escapeHTML(g.giftId || "Нет данных")}</div>
-    <div class="small">${escapeHTML(item)}</div>
-    <div class="small">Редкость: ${escapeHTML(g.fromPermille ?? "?")} → ${escapeHTML(g.toPermille ?? "?")}</div>
-    <div class="small">Время: ${escapeHTML(getTime(g.at))}</div>
-  </div>
-`;
-}).join("");
-}
-async function loadGifts() {
-document.getElementById("latest").textContent =
-  "🔄 Запрашиваю подарки из API...";
-if (loading) return;
-loading = true;
-try {
-const response = await fetch(
-API + "?since=" + encodeURIComponent(cursor) + "&limit=1000"
-);
-if (!response.ok) {
-  throw new Error("Ошибка API: " + response.status);
-}
+ if (gifts.length === 0) {
+  latest.textContent = "API ответил, но подходящих событий пока нет.";
+  return;
+ }
 
-const data = await response.json();
- document.getElementById("latest").textContent =
-  "API получен! Событий: " + data.events.length;
+ latest.innerHTML = gifts.slice(0, 50).map(function(g, index) {
+  let item = "Улучшение подарка";
 
-if (!Array.isArray(data.events)) {
-  throw new Error("Неверный формат API");
-}
-
-for (const event of data.events) {
-  if (
-    event.type === "model.rarity_changed" ||
-    event.type === "backdrop.rarity_changed" ||
-    event.type === "symbol.rarity_changed" ||
-    event.type === "gift.upgrades_added"
-  ) {
-    gifts.push(event);
+  if (g.type === "model.rarity_changed") {
+   item = "Модель: " + (g.model || "Неизвестно");
   }
-}
 
-if (data.next) {
-  cursor = String(data.next);
-}
-
-const unique = new Map();
-
-for (const g of gifts) {
-  const key = g.id || `${g.giftId}-${g.at}-${g.type}`;
-  unique.set(String(key), g);
-}
-
-gifts = [...unique.values()];
-
-renderGifts();
-} catch (error) {
-    console.error("GiftMonitor:", error);
-
-    document.getElementById("latest").textContent =
-      "ОШИБКА: " + error.message;
+  if (g.type === "backdrop.rarity_changed") {
+   item = "Фон: " + (g.backdrop || "Неизвестно");
   }
-loading = false;
-}
-function searchGift() {
-const query = document.getElementById("search")
-.value.trim().toLowerCase();
-const results = document.getElementById("results");
-if (!query) {
-results.textContent = "Введи название или ID подарка.";
-return;
-}
-const found = gifts.filter(g =>
-String(g.gift  "").toLowerCase().includes(query) 
-String(g.giftId || "").toLowerCase().includes(query)
-);
-if (!found.length) {
-results.textContent = "Подарок не найден.";
-return;
-}
-results.innerHTML = found.map(g => <div class="gift"> <b>🎁 ${escapeHTML(g.gift  "Неизвестный подарок")}</b> <div class="small">ID: ${escapeHTML(g.giftId  "Нет данных")}</div> <div class="small">${escapeHTML(getTime(g.at))}</div> </div>).join("");
-}
-loadGifts();
-setInterval(loadGifts, 30000);
-</script>
-</body>
-</html>
+
+  if (g.type === "symbol.rarity_changed") {
+   item = "Символ: " + (g.symbol || "Неизвестно");
+  }
+
+  return `
+   <div class="gift">
