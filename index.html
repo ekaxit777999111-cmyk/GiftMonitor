@@ -160,42 +160,35 @@ function getTime(value) {
 }
 
 function renderGifts() {
- const latest = document.getElementById("latest");
- const total = document.getElementById("total");
+const latest = document.getElementById("latest");
+const total = document.getElementById("total");
 
- gifts.sort(function(a, b) {
-  return new Date(b.at) - new Date(a.at);
- });
+gifts.sort(function(a, b) {
+return new Date(b.at) - new Date(a.at);
+});
 
- total.textContent = gifts.length;
+total.textContent = gifts.length;
 
- if (gifts.length === 0) {
-  latest.textContent = "Подходящих событий пока нет.";
-  return;
- }
+if (gifts.length === 0) {
+latest.textContent = "Подходящих событий пока нет.";
+return;
+}
 
- latest.innerHTML = gifts.slice(0, 50).map(function(g) {
-  let item = "Улучшение подарка";
+latest.innerHTML = gifts.slice(0, 50).map(function(g) {
 
-  if (g.type === "model.rarity_changed") {
-   item = "Модель: " + (g.model || "Неизвестно");
-  }
+const model = g.model || "Нет данных";
+const backdrop = g.backdrop || "Нет данных";
+const symbol = g.symbol || "Нет данных";
 
-  if (g.type === "backdrop.rarity_changed") {
-   item = "Фон: " + (g.backdrop || "Неизвестно");
-  }
+return `
 
-  if (g.type === "symbol.rarity_changed") {
-   item = "Символ: " + (g.symbol || "Неизвестно");
-  }
+<div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
 
-  return `
-   <div class="gift">
-    <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
-    <div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
-    <div>${escapeHTML(item)}</div>
-    <div class="small">${escapeHTML(getTime(g.at))}</div>
-   </div>
+<div>🎨 Модель: ${escapeHTML(model)}</div>
+<div>🖼 Фон: ${escapeHTML(backdrop)}</div>
+<div>🔣 Символ: ${escapeHTML(symbol)}</div>
+
+<div class="small">${escapeHTML(getTime(g.at))}</div>
   `;
  }).join("");
 }
