@@ -201,10 +201,11 @@ gifts = [...unique.values()];
 
 renderGifts();
 } catch (error) {
-console.error("GiftMonitor:", error);
-document.getElementById("latest").textContent =
-  "Ошибка загрузки данных. Проверь консоль браузера.";
-}
+    console.error("GiftMonitor:", error);
+
+    document.getElementById("latest").textContent =
+      "ОШИБКА: " + error.message;
+  }
 loading = false;
 }
 function searchGift() {
