@@ -191,7 +191,7 @@ function renderGifts() {
   return `
    <div class="gift">
     <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
-    <div class="small">ID подарка: ${escapeHTML(g.giftId || "—")}</div>
+    <div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
     <div>${escapeHTML(item)}</div>
     <div class="small">${escapeHTML(getTime(g.at))}</div>
    </div>
@@ -231,7 +231,6 @@ function searchGift() {
 
 async function loadGifts() {
  if (loading) return;
-
  loading = true;
 
  const status = document.getElementById("status");
@@ -287,3 +286,5 @@ async function loadGifts() {
 loadGifts();
 setInterval(loadGifts, 30000);
 </script>
+</body>
+</html>
