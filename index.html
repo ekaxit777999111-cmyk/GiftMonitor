@@ -199,24 +199,99 @@ function renderGifts() {
  }).join("");
 }
 
-function searchGift() {
- const query = document.getElementById("search").value.toLowerCase().trim();
- const results = document.getElementById("results");
+async function searchGift() {
+const query = document.getElementById("search").value.toLowerCase().trim();
+const results = document.getElementById("results");
 
- if (!query) {
-  results.textContent = "Введи название или ID подарка.";
-  return;
- }
+if (!query) {
+results.textContent = "Введи название или ID подарка.";
+return;
+}
 
 const found = gifts.filter(function(g) {
- return String(g.gift || "").toLowerCase().includes(query) ||
-  String(g.giftId || "").includes(query);
+return String(g.gift  "").toLowerCase().includes(query) 
+String(g.giftId || "").includes(query);
 });
 
- if (found.length === 0) {
-  results.textContent = "Подарок не найден.";
-  return;
- }
+if (found.length === 0) {
+results.textContent = "Подарок не найден.";
+return;
+}
+
+results.textContent = "Загружаю информацию о подарках...";
+
+const uniqueGifts = [];
+const seen = new Set();
+
+found.forEach(function(g) {
+const id = g.giftId || g.gift;
+if (!seen.has(id)) {
+seen.add(id);
+uniqueGifts.push(g);
+}
+});
+
+function showVariants(items) {
+if (!Array.isArray(items) || items.length === 0) {
+return "Нет данных";
+}
+
+return items.slice(0, 10).map(function(item) {
+const rarity = Number.isFinite(Number(item.rarity))
+? Number(item.rarity)
+: Number(item.rarityPermille || 0) / 10;
+
+return "<div class='small'>• " +
+escapeHTML(item.name || "Без названия") +
+" — " + rarity.toFixed(1) + "%</div>";
+}).join("") +
+(items.length > 10
+? "<div class='small'>И ещё " + (items.length - 10) + " вариантов...</div>"
+: "");
+}
+
+const cards = await Promise.all(uniqueGifts.map(async function(g) {
+try {
+const response = await fetch(
+"https://api.changes.tg/gift/" + encodeURIComponent(g.gift)
+);
+
+if (!response.ok) {
+throw new Error("API error");
+}
+
+const data = await response.json();
+
+return `
+<div class="gift">
+<strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
+<div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
+<div class="small">Последнее событие: ${escapeHTML(getTime(g.at))}</div>
+
+ <hr>
+
+ <strong>🎨 Модели (${(data.models || []).length})</strong>
+ ${showVariants(data.models)}
+
+ <br>
+ <strong>🖼 Фоны (${(data.backdrops || []).length})</strong>
+ ${showVariants(data.backdrops)}
+
+ <br>
+ <strong>🔣 Символы (${(data.symbols || []).length})</strong>
+ ${showVariants(data.symbols)}
+</div>
+; } catch (error) { return 
+<div class="gift">
+<strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
+<div class="small">Не удалось загрузить подробную информацию.</div>
+</div>
+`;
+}
+}));
+
+results.innerHTML = cards.join("");
+}
 
  results.innerHTML = found.map(function(g) {
   return `
