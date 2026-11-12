@@ -183,7 +183,7 @@ return;
 const grouped = {};
 
 sorted.forEach(function(g) {
-const key = String(g.giftId  g.gift  "unknown");
+const key = String(g.giftId || g.gift || "unknown");
 
 if (!grouped[key]) {
 grouped[key] = {
