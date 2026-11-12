@@ -169,7 +169,7 @@ function renderGifts() {
 const latest = document.getElementById("latest");
 const total = document.getElementById("total");
 
-gifts.sort(function(a, b) {
+const sorted = [...gifts].sort(function(a, b) {
 return new Date(b.at) - new Date(a.at);
 });
 
@@ -180,28 +180,60 @@ latest.textContent = "Подходящих событий пока нет.";
 return;
 }
 
-latest.innerHTML = gifts.slice(0, 50).map(function(g) {
+const grouped = {};
 
-const model = g.model || "Нет данных";
-const backdrop = g.backdrop || "Нет данных";
-const symbol = g.symbol || "Нет данных";
+sorted.forEach(function(g) {
+const key = String(g.giftId  g.gift  "unknown");
 
+if (!grouped[key]) {
+grouped[key] = {
+gift: g.gift || "Неизвестный подарок",
+giftId: g.giftId || "—",
+model: "Нет данных",
+backdrop: "Нет данных",
+symbol: "Нет данных",
+at: g.at
+};
+}
+
+const card = grouped[key];
+
+if (g.type === "model.rarity_changed" && g.model) {
+if (card.model === "Нет данных") {
+card.model = g.model;
+}
+}
+
+if (g.type === "backdrop.rarity_changed" && g.backdrop) {
+if (card.backdrop === "Нет данных") {
+card.backdrop = g.backdrop;
+}
+}
+
+if (g.type === "symbol.rarity_changed" && g.symbol) {
+if (card.symbol === "Нет данных") {
+card.symbol = g.symbol;
+}
+}
+});
+
+const cards = Object.values(grouped);
+
+latest.innerHTML = cards.slice(0, 50).map(function(g) {
 return `
- <div class="gift">
-  <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
 
-  <div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
+<div class="small">ID: ${escapeHTML(g.giftId)}</div>
 
-  <br>
+<br>
 
-  <div>🎨 Модель: ${escapeHTML(model)}</div>
-  <div>🖼 Фон: ${escapeHTML(backdrop)}</div>
-  <div>🔣 Символ: ${escapeHTML(symbol)}</div>
+<div>🎨 Модель: ${escapeHTML(g.model)}</div>
+<div>🖼 Фон: ${escapeHTML(g.backdrop)}</div>
+<div>🔣 Символ: ${escapeHTML(g.symbol)}</div>
 
-  <br>
+<br>
 
-  <div class="small">${escapeHTML(getTime(g.at))}</div>
- </div>
+<div class="small">${escapeHTML(getTime(g.at))}</div>
+</div>
 `;
  }).join("");
 }
