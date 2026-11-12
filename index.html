@@ -187,7 +187,7 @@ const key = String(g.giftId || g.gift || "unknown");
 
 if (!grouped[key]) {
 grouped[key] = {
-gift: g.gift || "Неизвестный подарок",
+gift: g.gift || g.name || "Неизвестный подарок",
 giftId: g.giftId || "—",
 model: "Нет данных",
 backdrop: "Нет данных",
