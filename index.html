@@ -209,7 +209,7 @@ function searchGift() {
  }
 
 const found = gifts.filter(function(g) {
- return String(g.gift  "").toLowerCase().includes(query) ||
+ return String(g.gift || "").toLowerCase().includes(query) ||
   String(g.giftId || "").includes(query);
 });
 
