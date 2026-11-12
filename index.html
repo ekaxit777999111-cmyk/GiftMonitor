@@ -95,7 +95,7 @@ nav span{font-size:12px;text-align:center}
 <script>
 const API = "https://api.changes.tg/changes";
 let gifts = [];
-let cursor = String(Date.now() - 30 * 24 * 60 * 60 * 1000);
+let cursor = "0";
 let loading = false;
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, c => ({
