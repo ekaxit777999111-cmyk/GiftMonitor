@@ -146,7 +146,7 @@ function escapeHTML(value) {
    "<": "&lt;",
    ">": "&gt;",
    '"': "&quot;",
-   "'": "&#039;"
+   "'": "&#39;"
   }[c];
  });
 }
@@ -205,3 +205,87 @@ function renderGifts() {
 
   return `
    <div class="gift">
+<strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
+<div class="small">ID подарка: ${escapeHTML(g.giftId || "—")}</div>
+<div>${escapeHTML(item)}</div>
+<div class="small">${escapeHTML(getTime(g.at))}</div>
+
+function searchGift() {
+const query = document.getElementById("search").value.toLowerCase().trim();
+const results = document.getElementById("results");
+
+const found = gifts.filter(function(g) {
+return String(g.gift  "").toLowerCase().includes(query) 
+String(g.giftId || "").includes(query);
+});
+
+if (!query) {
+results.textContent = "Введи название или ID подарка.";
+return;
+}
+
+if (found.length === 0) {
+results.textContent = "Подарок не найден.";
+return;
+}
+
+results.innerHTML = found.map(function(g) {
+return `
+
+async function loadGifts() {
+if (loading) return;
+loading = true;
+
+const status = document.getElementById("status");
+const latest = document.getElementById("latest");
+
+try {
+const response = await fetch(
+API + "?since=" + encodeURIComponent(cursor) + "&limit=1000"
+);
+
+if (!response.ok) {
+throw new Error("Ошибка API: " + response.status);
+}
+
+const data = await response.json();
+const events = Array.isArray(data.events) ? data.events : [];
+
+const allowed = [
+"model.rarity_changed",
+"backdrop.rarity_changed",
+"symbol.rarity_changed",
+"gift.upgrades_added"
+];
+
+const existing = new Set(gifts.map(function(g) {
+return g.id;
+}));
+
+events.forEach(function(event) {
+if (allowed.includes(event.type) && !existing.has(event.id)) {
+gifts.push(event);
+existing.add(event.id);
+}
+});
+
+if (data.next) {
+cursor = data.next;
+}
+
+status.textContent = "ON";
+renderGifts();
+
+} catch (error) {
+status.textContent = "ERROR";
+latest.textContent = "Не удалось подключиться к API: " + error.message;
+console.error(error);
+
+} finally {
+loading = false;
+}
+}
+
+loadGifts();
+setInterval(loadGifts, 30000);
+</script>
