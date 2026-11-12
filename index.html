@@ -151,26 +151,11 @@ function escapeHTML(value) {
  });
 }
 
-function getTimestamp(value) {
- if (!value) return 0;
-
- const n = Number(value);
-
- if (Number.isFinite(n)) {
-  return n < 100000000000 ? n * 1000 : n;
- }
-
- const parsed = new Date(value).getTime();
-
- return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function getTime(value) {
- const timestamp = getTimestamp(value);
-
- return timestamp
-  ? new Date(timestamp).toLocaleString("ru-RU")
-  : "Время неизвестно";
+ const date = new Date(value);
+ return Number.isNaN(date.getTime())
+  ? "Время неизвестно"
+  : date.toLocaleString("ru-RU");
 }
 
 function renderGifts() {
@@ -178,17 +163,17 @@ function renderGifts() {
  const total = document.getElementById("total");
 
  gifts.sort(function(a, b) {
-  return getTimestamp(b.at) - getTimestamp(a.at);
+  return new Date(b.at) - new Date(a.at);
  });
 
  total.textContent = gifts.length;
 
  if (gifts.length === 0) {
-  latest.textContent = "API ответил, но подходящих событий пока нет.";
+  latest.textContent = "Подходящих событий пока нет.";
   return;
  }
 
- latest.innerHTML = gifts.slice(0, 50).map(function(g, index) {
+ latest.innerHTML = gifts.slice(0, 50).map(function(g) {
   let item = "Улучшение подарка";
 
   if (g.type === "model.rarity_changed") {
@@ -205,85 +190,98 @@ function renderGifts() {
 
   return `
    <div class="gift">
-<strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
-<div class="small">ID подарка: ${escapeHTML(g.giftId || "—")}</div>
-<div>${escapeHTML(item)}</div>
-<div class="small">${escapeHTML(getTime(g.at))}</div>
+    <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
+    <div class="small">ID подарка: ${escapeHTML(g.giftId || "—")}</div>
+    <div>${escapeHTML(item)}</div>
+    <div class="small">${escapeHTML(getTime(g.at))}</div>
+   </div>
+  `;
+ }).join("");
+}
 
 function searchGift() {
-const query = document.getElementById("search").value.toLowerCase().trim();
-const results = document.getElementById("results");
+ const query = document.getElementById("search").value.toLowerCase().trim();
+ const results = document.getElementById("results");
 
-const found = gifts.filter(function(g) {
-return String(g.gift  "").toLowerCase().includes(query) 
-String(g.giftId || "").includes(query);
-});
+ if (!query) {
+  results.textContent = "Введи название или ID подарка.";
+  return;
+ }
 
-if (!query) {
-results.textContent = "Введи название или ID подарка.";
-return;
+ const found = gifts.filter(function(g) {
+  return String(g.gift  "").toLowerCase().includes(query) 
+   String(g.giftId || "").includes(query);
+ });
+
+ if (found.length === 0) {
+  results.textContent = "Подарок не найден.";
+  return;
+ }
+
+ results.innerHTML = found.map(function(g) {
+  return `
+   <div class="gift">
+    <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
+    <div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
+    <div class="small">${escapeHTML(getTime(g.at))}</div>
+   </div>
+  `;
+ }).join("");
 }
-
-if (found.length === 0) {
-results.textContent = "Подарок не найден.";
-return;
-}
-
-results.innerHTML = found.map(function(g) {
-return `
 
 async function loadGifts() {
-if (loading) return;
-loading = true;
+ if (loading) return;
 
-const status = document.getElementById("status");
-const latest = document.getElementById("latest");
+ loading = true;
 
-try {
-const response = await fetch(
-API + "?since=" + encodeURIComponent(cursor) + "&limit=1000"
-);
+ const status = document.getElementById("status");
+ const latest = document.getElementById("latest");
 
-if (!response.ok) {
-throw new Error("Ошибка API: " + response.status);
-}
+ try {
+  const response = await fetch(
+   API + "?since=" + encodeURIComponent(cursor) + "&limit=1000"
+  );
 
-const data = await response.json();
-const events = Array.isArray(data.events) ? data.events : [];
+  if (!response.ok) {
+   throw new Error("Ошибка API: " + response.status);
+  }
 
-const allowed = [
-"model.rarity_changed",
-"backdrop.rarity_changed",
-"symbol.rarity_changed",
-"gift.upgrades_added"
-];
+  const data = await response.json();
+  const events = Array.isArray(data.events) ? data.events : [];
 
-const existing = new Set(gifts.map(function(g) {
-return g.id;
-}));
+  const allowed = [
+   "model.rarity_changed",
+   "backdrop.rarity_changed",
+   "symbol.rarity_changed",
+   "gift.upgrades_added"
+  ];
 
-events.forEach(function(event) {
-if (allowed.includes(event.type) && !existing.has(event.id)) {
-gifts.push(event);
-existing.add(event.id);
-}
-});
+  const existing = new Set(gifts.map(function(g) {
+   return g.id;
+  }));
 
-if (data.next) {
-cursor = data.next;
-}
+  events.forEach(function(event) {
+   if (allowed.includes(event.type) && !existing.has(event.id)) {
+    gifts.push(event);
+    existing.add(event.id);
+   }
+  });
 
-status.textContent = "ON";
-renderGifts();
+  if (data.next) {
+   cursor = data.next;
+  }
 
-} catch (error) {
-status.textContent = "ERROR";
-latest.textContent = "Не удалось подключиться к API: " + error.message;
-console.error(error);
+  status.textContent = "ON";
+  renderGifts();
 
-} finally {
-loading = false;
-}
+ } catch (error) {
+  status.textContent = "ERROR";
+  latest.textContent = "Ошибка подключения: " + error.message;
+  console.error(error);
+
+ } finally {
+  loading = false;
+ }
 }
 
 loadGifts();
