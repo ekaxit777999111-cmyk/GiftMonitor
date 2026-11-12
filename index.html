@@ -165,7 +165,7 @@ function getTime(value) {
   : date.toLocaleString("ru-RU");
 }
 
-function renderGifts() {
+latest() {
 const latest = document.getElementById("latest");
 const total = document.getElementById("total");
 
@@ -221,21 +221,23 @@ const cards = Object.values(grouped);
 
 latest.innerHTML = cards.slice(0, 50).map(function(g) {
 return `
+ <div class="gift">
+  <strong>${escapeHTML(g.gift)}</strong>
 
-<div class="small">ID: ${escapeHTML(g.giftId)}</div>
+  <div class="small">ID: ${escapeHTML(g.giftId)}</div>
 
-<br>
+  <br>
 
-<div>🎨 Модель: ${escapeHTML(g.model)}</div>
-<div>🖼 Фон: ${escapeHTML(g.backdrop)}</div>
-<div>🔣 Символ: ${escapeHTML(g.symbol)}</div>
+  <div>🎨 Модель: ${escapeHTML(g.model)}</div>
+  <div>🖼 Фон: ${escapeHTML(g.backdrop)}</div>
+  <div>🔣 Символ: ${escapeHTML(g.symbol)}</div>
 
-<br>
+  <br>
 
-<div class="small">${escapeHTML(getTime(g.at))}</div>
-</div>
+  <div class="small">${escapeHTML(getTime(g.at))}</div>
+ </div>
 `;
- }).join("");
+}).join("");
 }
 
 async function searchGift() {
