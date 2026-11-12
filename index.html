@@ -285,17 +285,17 @@ async function searchGift() {
      ${showVariants(data.symbols)}
     </div>
    `;
-  } catch (error) {
-   console.error(error);
+ } catch (error) {
+ console.error(error);
 
-   return `
-    <div class="gift">
-     <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
-     <div class="small">Не удалось загрузить подробную информацию.</div>
-    </div>
-   `;
-  }
- }));
+ return `
+  <div class="gift">
+   <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
+   <div class="small">Не удалось загрузить подробную информацию.</div>
+  </div>
+ `;
+}
+}));
 
  results.innerHTML = cards.join("");
 }
@@ -305,7 +305,58 @@ async function loadGifts() {
 
  loading = true;
 
- const status = document.
+ const status = document.getElementById("status");
+ const latest = document.getElementById("latest");
+
+ try {
+  const response = await fetch(
+   API + "?since=" + encodeURIComponent(cursor) + "&limit=1000"
+  );
+
+  if (!response.ok) {
+   throw new Error("Ошибка API: " + response.status);
+  }
+
+  const data = await response.json();
+  const events = Array.isArray(data.events) ? data.events : [];
+
+  const allowed = [
+   "model.rarity_changed",
+   "backdrop.rarity_changed",
+   "symbol.rarity_changed",
+   "gift.upgrades_added"
+  ];
+
+  const existing = new Set(gifts.map(function(g) {
+   return g.id;
+  }));
+
+  events.forEach(function(event) {
+   if (allowed.includes(event.type) && !existing.has(event.id)) {
+    gifts.push(event);
+    existing.add(event.id);
+   }
+  });
+
+  if (data.next) {
+   cursor = data.next;
+  }
+
+  status.textContent = "ON";
+  renderGifts();
+
+ } catch (error) {
+  status.textContent = "ERROR";
+  latest.textContent = "Ошибка подключения: " + error.message;
+  console.error(error);
+
+ } finally {
+  loading = false;
+ }
+}
+
+loadGifts();
+setInterval(loadGifts, 30000);
 </script>
 </body>
 </html>
