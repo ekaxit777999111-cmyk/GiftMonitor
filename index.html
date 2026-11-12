@@ -211,7 +211,7 @@ function searchGift() {
  const found = gifts.filter(function(g) {
   return String(g.gift  "").toLowerCase().includes(query) 
    String(g.giftId || "").includes(query);
- });
+});
 
  if (found.length === 0) {
   results.textContent = "Подарок не найден.";
