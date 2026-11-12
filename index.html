@@ -221,17 +221,17 @@ async function searchGift() {
 
  results.textContent = "Загружаю информацию о подарках...";
 
- const uniqueGifts = [];
- const seen = new Set();
+const uniqueGifts = [];
+const seen = new Set();
 
- found.forEach(function(g) {
-  const id = g.giftId || g.gift;
+found.forEach(function(g) {
+ const name = String(g.gift || "").toLowerCase().trim();
 
-  if (!seen.has(id)) {
-   seen.add(id);
-   uniqueGifts.push(g);
-  }
- });
+ if (!seen.has(name)) {
+  seen.add(name);
+  uniqueGifts.push(g);
+ }
+});
 
  function showVariants(items) {
   if (!Array.isArray(items) || items.length === 0) {
