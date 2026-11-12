@@ -93,138 +93,115 @@ nav span{font-size:12px;text-align:center}
 <span>👤<br>Профиль</span>
 </nav>
 
-<script>
 const API = "https://api.changes.tg/changes";
-
 let gifts = [];
 let cursor = String(Date.now() - 7 * 24 * 60 * 60 * 1000);
 let loading = false;
-
 function escapeHTML(value) {
- return String(value ?? "").replace(/[&<>"']/g, c => ({
-  "&":"&amp;", "<":"&lt;", ">":"&gt;",
-  '"':"&quot;", "'":"&#39;"
- })[c]);
+return String(value ?? "").replace(/[&<>"']/g, c => ({
+"&": "&",
+"<": "<",
+">": ">",
+'"': """,
+"'": "'"
+})[c]);
 }
-
+function getTimestamp(value) {
+if (value == null) return 0;
+let n = Number(value);
+if (Number.isFinite(n)) {
+return n < 100000000000 ? n * 1000 : n;
+}
+let parsed = new Date(value).getTime();
+return Number.isFinite(parsed) ? parsed : 0;
+}
 function getTime(value) {
- let date = new Date(value);
- if (!Number.isFinite(date.getTime())) {
-  date = new Date(Number(value) *
-   (Number(value) < 100000000000 ? 1000 : 1));
- }
- return Number.isFinite(date.getTime())
-  ? date.toLocaleString("ru-RU")
-  : "Время неизвестно";
+let timestamp = getTimestamp(value);
+return timestamp
+? new Date(timestamp).toLocaleString("ru-RU")
+: "Время неизвестно";
 }
-
 function renderGifts() {
- const latest = document.getElementById("latest");
- const total = document.getElementById("total");
-
- const upgrades = gifts
-  .filter(g => g.type === "gift.upgrades_added")
-  .sort((a,b) => {
-   const time = v => {
-    let n = Number(v);
-    return Number.isFinite(n) ? n : new Date(v).getTime();
-   };
-   return time(b.at) - time(a.at);
-  });
-
- total.textContent = upgrades.length;
-
- if (!upgrades.length) {
-  latest.textContent = "Пока новых улучшений не найдено";
-  return;
- }
-
- latest.innerHTML = upgrades.slice(0,30).map(g => `
-  <div class="gift">
-   <b>🎁 ${escapeHTML(g.gift || "Неизвестный подарок")}</b>
-   <div class="small">ID подарка: ${escapeHTML(g.giftId || "Нет данных")}</div>
-   <div class="small">Время: ${escapeHTML(getTime(g.at))}</div>
-  </div>
- `).join("");
+const latest = document.getElementById("latest");
+const total = document.getElementById("total");
+const upgrades = gifts
+.filter(g => g.type === "gift.upgrades_added")
+.sort((a, b) => getTimestamp(b.at) - getTimestamp(a.at));
+total.textContent = upgrades.length;
+if (!upgrades.length) {
+latest.textContent = "Пока новых улучшений не найдено";
+return;
 }
-
+latest.innerHTML = upgrades.slice(0, 30).map((g, index) => <div class="gift"> <b>{index === 0 ? "🆕 " : "🎁 "}{escapeHTML(g.gift || "Неизвестный подарок")}</b> <div class="small">ID подарка: ${escapeHTML(g.giftId || "Нет данных")}</div> <div class="small">Время: ${escapeHTML(getTime(g.at))}</div> ${index === 0 ? '<div class="small">⚡ Последнее улучшение</div>' : ""} </div>).join("");
+}
 async function loadGifts() {
- if (loading) return;
- loading = true;
+if (loading) return;
+loading = true;
+try {
+const url = API + "?since=" +
+encodeURIComponent(cursor) + "&limit=1000";
+const response = await fetch(url);
 
- try {
-  const url = API + "?since=" +
-   encodeURIComponent(cursor) + "&limit=1000";
+if (!response.ok) {
+  throw new Error("Ошибка API: " + response.status);
+}
 
-  const response = await fetch(url);
+const data = await response.json();
 
-  if (!response.ok) {
-   throw new Error("Ошибка API: " + response.status);
-  }
+if (!Array.isArray(data.events)) {
+  throw new Error("Неожиданный формат API");
+}
 
-  const data = await response.json();
-
-  if (!Array.isArray(data.events)) {
-   throw new Error("Неожиданный формат ответа API");
-  }
-
-  for (const event of data.events) {
-   if (event.type === "gift.upgrades_added") {
+for (const event of data.events) {
+  if (event.type === "gift.upgrades_added") {
     gifts.push(event);
-   }
   }
-
-  if (data.next) cursor = String(data.next);
-
-  // Не сохраняем повторяющиеся события
-  gifts = [...new Map(
-   gifts.map(g => [String(g.id), g])
-  ).values()];
-
-  renderGifts();
-
- } catch (error) {
-  console.error(error);
-  document.getElementById("latest").textContent =
-   "Не удалось получить данные API. Проверь подключение.";
- } finally {
-  loading = false;
- }
 }
 
+if (data.next) {
+  cursor = String(data.next);
+}
+
+const unique = new Map();
+
+for (const g of gifts) {
+  const key = g.id != null
+    ? String(g.id)
+    : `${g.giftId}-${g.at}-${g.gift}`;
+
+  unique.set(key, g);
+}
+
+gifts = [...unique.values()];
+
+renderGifts();
+} catch (error) {
+console.error(error);
+document.getElementById("latest").textContent =
+  "Не удалось получить данные API. Проверь подключение.";
+} finally {
+loading = false;
+}
+}
 function searchGift() {
- const query = document.getElementById("search")
-  .value.trim().toLowerCase();
-
- const results = document.getElementById("results");
-
- if (!query) {
-  results.textContent = "Введи название или ID подарка.";
-  return;
- }
-
- const found = gifts.filter(g =>
-  String(g.gift  "").toLowerCase().includes(query) 
-  String(g.giftId || "").toLowerCase().includes(query)
- );
-
- if (!found.length) {
-  results.textContent =
-   "Совпадений нет среди загруженных событий.";
-  return;
- }
-
- results.innerHTML = found.map(g => `
-  <div class="gift">
-   <b>🎁 ${escapeHTML(g.gift || "Неизвестный подарок")}</b>
-   <div class="small">ID: ${escapeHTML(g.giftId)}</div>
-   <div class="small">${escapeHTML(getTime(g.at))}</div>
-  </div>
- `).join("");
+const query = document.getElementById("search")
+.value.trim().toLowerCase();
+const results = document.getElementById("results");
+if (!query) {
+results.textContent = "Введи название или ID подарка.";
+return;
 }
-
+const found = gifts.filter(g =>
+String(g.gift || "").toLowerCase().includes(query) ||
+String(g.giftId || "").toLowerCase().includes(query)
+).sort((a, b) => getTimestamp(b.at) - getTimestamp(a.at));
+if (!found.length) {
+results.textContent = "Совпадений нет среди загруженных событий.";
+return;
+}
+results.innerHTML = found.map(g => <div class="gift"> <b>🎁 ${escapeHTML(g.gift || "Неизвестный подарок")}</b> <div class="small">ID: ${escapeHTML(g.giftId || "Нет данных")}</div> <div class="small">${escapeHTML(getTime(g.at))}</div> </div>).join("");
+}
 loadGifts();
 setInterval(loadGifts, 30000);
-</script>
 </body>
 </html>
