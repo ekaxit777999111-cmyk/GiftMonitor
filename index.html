@@ -200,166 +200,111 @@ function renderGifts() {
 }
 
 async function searchGift() {
-const query = document.getElementById("search").value.toLowerCase().trim();
-const results = document.getElementById("results");
+ const query = document.getElementById("search").value.toLowerCase().trim();
+ const results = document.getElementById("results");
 
-if (!query) {
-results.textContent = "Введи название или ID подарка.";
-return;
-}
+ if (!query) {
+  results.textContent = "Введи название или ID подарка.";
+  return;
+ }
 
-const found = gifts.filter(function(g) {
-return String(g.gift  "").toLowerCase().includes(query) 
-String(g.giftId || "").includes(query);
-});
+ const found = gifts.filter(function(g) {
+  return String(g.gift  "").toLowerCase().includes(query) 
+   String(g.giftId || "").includes(query);
+ });
 
-if (found.length === 0) {
-results.textContent = "Подарок не найден.";
-return;
-}
+ if (found.length === 0) {
+  results.textContent = "Подарок не найден.";
+  return;
+ }
 
-results.textContent = "Загружаю информацию о подарках...";
+ results.textContent = "Загружаю информацию о подарках...";
 
-const uniqueGifts = [];
-const seen = new Set();
+ const uniqueGifts = [];
+ const seen = new Set();
 
-found.forEach(function(g) {
-const id = g.giftId || g.gift;
-if (!seen.has(id)) {
-seen.add(id);
-uniqueGifts.push(g);
-}
-});
+ found.forEach(function(g) {
+  const id = g.giftId || g.gift;
 
-function showVariants(items) {
-if (!Array.isArray(items) || items.length === 0) {
-return "Нет данных";
-}
+  if (!seen.has(id)) {
+   seen.add(id);
+   uniqueGifts.push(g);
+  }
+ });
 
-return items.slice(0, 10).map(function(item) {
-const rarity = Number.isFinite(Number(item.rarity))
-? Number(item.rarity)
-: Number(item.rarityPermille || 0) / 10;
+ function showVariants(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+   return "Нет данных";
+  }
 
-return "<div class='small'>• " +
-escapeHTML(item.name || "Без названия") +
-" — " + rarity.toFixed(1) + "%</div>";
-}).join("") +
-(items.length > 10
-? "<div class='small'>И ещё " + (items.length - 10) + " вариантов...</div>"
-: "");
-}
+  return items.slice(0, 10).map(function(item) {
+   const rarity = item.rarity != null
+    ? Number(item.rarity)
+    : Number(item.rarityPermille || 0) / 10;
 
-const cards = await Promise.all(uniqueGifts.map(async function(g) {
-try {
-const response = await fetch(
-"https://api.changes.tg/gift/" + encodeURIComponent(g.gift)
-);
+   return "<div class='small'>• " +
+    escapeHTML(item.name || "Без названия") +
+    " — " + (Number.isFinite(rarity) ? rarity.toFixed(1) : "—") +
+    "%</div>";
+  }).join("") +
+   (items.length > 10
+    ? "<div class='small'>И ещё " + (items.length - 10) + " вариантов...</div>"
+    : "");
+ }
 
-if (!response.ok) {
-throw new Error("API error");
-}
+ const cards = await Promise.all(uniqueGifts.map(async function(g) {
+  try {
+   const response = await fetch(
+    "https://api.changes.tg/gift/" + encodeURIComponent(g.gift)
+   );
 
-const data = await response.json();
+   if (!response.ok) {
+    throw new Error("API error: " + response.status);
+   }
 
-return `
-<div class="gift">
-<strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
-<div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
-<div class="small">Последнее событие: ${escapeHTML(getTime(g.at))}</div>
+   const data = await response.json();
 
- <hr>
+   return `
+    <div class="gift">
+     <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
+     <div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
+     <div class="small">Последнее событие: ${escapeHTML(getTime(g.at))}</div>
 
- <strong>🎨 Модели (${(data.models || []).length})</strong>
- ${showVariants(data.models)}
+     <hr>
 
- <br>
- <strong>🖼 Фоны (${(data.backdrops || []).length})</strong>
- ${showVariants(data.backdrops)}
+     <strong>🎨 Модели (${(data.models || []).length})</strong>
+     ${showVariants(data.models)}
 
- <br>
- <strong>🔣 Символы (${(data.symbols || []).length})</strong>
- ${showVariants(data.symbols)}
-</div>
-; } catch (error) { return 
-<div class="gift">
-<strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
-<div class="small">Не удалось загрузить подробную информацию.</div>
-</div>
-`;
-}
-}));
+     <br>
+     <strong>🖼 Фоны (${(data.backdrops || []).length})</strong>
+     ${showVariants(data.backdrops)}
 
-results.innerHTML = cards.join("");
-}
+     <br>
+     <strong>🔣 Символы (${(data.symbols || []).length})</strong>
+     ${showVariants(data.symbols)}
+    </div>
+   `;
+  } catch (error) {
+   console.error(error);
 
- results.innerHTML = found.map(function(g) {
-  return `
-   <div class="gift">
-    <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
-    <div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
-    <div class="small">${escapeHTML(getTime(g.at))}</div>
-   </div>
-  `;
- }).join("");
+   return `
+    <div class="gift">
+     <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
+     <div class="small">Не удалось загрузить подробную информацию.</div>
+    </div>
+   `;
+  }
+ }));
+
+ results.innerHTML = cards.join("");
 }
 
 async function loadGifts() {
  if (loading) return;
+
  loading = true;
 
- const status = document.getElementById("status");
- const latest = document.getElementById("latest");
-
- try {
-  const response = await fetch(
-   API + "?since=" + encodeURIComponent(cursor) + "&limit=1000"
-  );
-
-  if (!response.ok) {
-   throw new Error("Ошибка API: " + response.status);
-  }
-
-  const data = await response.json();
-  const events = Array.isArray(data.events) ? data.events : [];
-
-  const allowed = [
-   "model.rarity_changed",
-   "backdrop.rarity_changed",
-   "symbol.rarity_changed",
-   "gift.upgrades_added"
-  ];
-
-  const existing = new Set(gifts.map(function(g) {
-   return g.id;
-  }));
-
-  events.forEach(function(event) {
-   if (allowed.includes(event.type) && !existing.has(event.id)) {
-    gifts.push(event);
-    existing.add(event.id);
-   }
-  });
-
-  if (data.next) {
-   cursor = data.next;
-  }
-
-  status.textContent = "ON";
-  renderGifts();
-
- } catch (error) {
-  status.textContent = "ERROR";
-  latest.textContent = "Ошибка подключения: " + error.message;
-  console.error(error);
-
- } finally {
-  loading = false;
- }
-}
-
-loadGifts();
-setInterval(loadGifts, 30000);
+ const status = document.
 </script>
 </body>
 </html>
