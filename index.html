@@ -119,6 +119,68 @@ nav span{font-size:12px;text-align:center}
   0 0 12px #00ff66,
   0 0 22px rgba(0,255,102,0.7);
 }
+ .premium-hero{
+ position:relative;
+ overflow:hidden;
+ margin-top:22px;
+ padding:25px 18px;
+ border:1px solid #8b5cf6;
+ border-radius:20px;
+ background:
+ linear-gradient(145deg,rgba(10,5,25,.94),rgba(25,10,48,.88)),
+ url("https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4");
+ background-size:cover;
+ background-position:center;
+ box-shadow:0 0 20px rgba(139,92,246,.3);
+}
+.premium-hero h2{
+ text-align:center;
+ font-size:28px;
+ color:#d8b4fe;
+ text-shadow:0 0 15px #9333ea;
+}
+.premium-hero .sub{
+ text-align:center;
+ line-height:1.6;
+}
+.premium-plans{
+ display:grid;
+ grid-template-columns:1fr;
+ gap:12px;
+ margin-top:20px;
+}
+.premium-plan{
+ padding:17px;
+ border:1px solid #7544b8;
+ border-radius:14px;
+ background:rgba(13,8,27,.94);
+}
+.premium-plan h3{
+ margin:0 0 8px;
+ color:#e9d5ff;
+}
+.premium-price{
+ font-size:25px;
+ font-weight:bold;
+ color:#fff;
+}
+.premium-benefits{
+ margin-top:22px;
+ padding:16px;
+ border-radius:14px;
+ background:rgba(13,8,27,.9);
+ border:1px solid #49316e;
+ line-height:2;
+}
+.premium-label{
+ display:inline-block;
+ padding:6px 12px;
+ border-radius:20px;
+ background:#6d28d9;
+ color:white;
+ font-size:11px;
+ letter-spacing:1px;
+}
 </style>
 </head>
 
@@ -132,6 +194,56 @@ nav span{font-size:12px;text-align:center}
  </div>
 </header>
 
+<div class="premium-hero">
+ <div style="text-align:center">
+  <div class="premium-label">EXCLUSIVE ACCESS</div>
+  <h2>👑 GIFTMONITOR<br>PREMIUM</h2>
+  <div class="sub">
+   Открой все возможности мониторинга Telegram-подарков
+  </div>
+ </div>
+
+ <div class="premium-plans">
+
+  <div class="premium-plan">
+   <h3>🥉 STARTER</h3>
+   <div class="premium-price">1 750 ⭐</div>
+   <div class="small">Доступ на 30 дней</div>
+   <button onclick="buyPremium(1750)">
+    Купить на 30 дней
+   </button>
+  </div>
+
+  <div class="premium-plan">
+   <h3>🥈 PRO</h3>
+   <div class="premium-price">3 000 ⭐</div>
+   <div class="small">Доступ на 60 дней</div>
+   <button onclick="buyPremium(3000)">
+    Купить на 60 дней
+   </button>
+  </div>
+
+  <div class="premium-plan">
+   <h3>🥇 ELITE</h3>
+   <div class="premium-price">4 750 ⭐</div>
+   <div class="small">Доступ на 90 дней</div>
+   <button onclick="buyPremium(4750)">
+    Купить на 90 дней
+   </button>
+  </div>
+
+ </div>
+
+ <div class="premium-benefits">
+  <strong>ПРЕИМУЩЕСТВА PREMIUM</strong><br>
+  ⚡ Моментальные листинги<br>
+  🔍 Точный поиск владельца<br>
+  🎧 Полное сопровождение
+ </div>
+</div>
+
+
+ 
 <div class="card">
  <h2>⚡ Мониторинг подарков</h2>
  <div class="stats">
