@@ -131,19 +131,37 @@ function getTime(value) {
 }
 
 function renderGifts() {
-  const latest = document.getElementById("latest");
-  const total = document.getElementById("total");
+   const latest = document.getElementById("latest");
+   const total = document.getElementById("total");
+ 
+   const upgrades = gifts
+     .sort((a, b) => getTimestamp(b.at) - getTimestamp(a.at));
+   total.textContent = upgrades.length;
+ 
+   if (!upgrades.length) {
+     latest.textContent = "Пока изменений не найдено";
+     return;
+   }
+ 
+   latest.innerHTML = upgrades.slice(0, 30).map((g, index) => {
+     let item = "Неизвестный элемент";
+    
+     if (g.type === "model.rarity_changed") item = "Модель: " + (g.model || "Неизвестно");
+     if (g.type === "backdrop.rarity_changed") item = "Фон: " + (g.backdrop || "Неизвестно");
+     if (g.type === "symbol.rarity_changed") item = "Символ: " + (g.symbol || "Неизвестно");
 
-  const upgrades = gifts
-    .filter(g => g.type === "gift.upgrades_added")
-    .sort((a, b) => getTimestamp(b.at) - getTimestamp(a.at));
-
-  total.textContent = upgrades.length;
-
-  if (!upgrades.length) {
-    latest.textContent = "Пока новых улучшений не найдено";
-    return;
-  }
+     return `
+       <div class="gift">
+         <b>￼{escapeHTML(g.gift || "Неизвестный подарок")}</b>
+         <div class="small">ID: ${escapeHTML(g.giftId || "Нет данных")}</div>
+         <div class="small">${escapeHTML(item)}</div>
+         <div class="small">Редкость: ${escapeHTML(g.fromPermille)} → ${escapeHTML(g.toPermille)}</div>
+         <div class="small">Время: ${escapeHTML(getTime(g.at))}</div>
+         ${index === 0 ? '<div class="small">⚡ Последнее изменение</div>' : ""}
+       </div>
+     `;
+   }).join("");
+ }
 
   latest.innerHTML = upgrades.slice(0, 30).map((g, index) => `
     <div class="gift">
