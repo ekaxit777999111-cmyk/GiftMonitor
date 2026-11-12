@@ -159,6 +159,8 @@ return `
 }).join("");
 }
 async function loadGifts() {
+document.getElementById("latest").textContent =
+  "🔄 Запрашиваю подарки из API...";
 if (loading) return;
 loading = true;
 try {
@@ -170,6 +172,8 @@ if (!response.ok) {
 }
 
 const data = await response.json();
+ document.getElementById("latest").textContent =
+  "API получен! Событий: " + data.events.length;
 
 if (!Array.isArray(data.events)) {
   throw new Error("Неверный формат API");
