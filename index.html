@@ -92,7 +92,7 @@ nav span{font-size:12px;text-align:center}
 <span>🔔<br>Уведомления</span>
 <span>👤<br>Профиль</span>
 </nav>
-
+<script>
 const API = "https://api.changes.tg/changes";
 let gifts = [];
 let cursor = String(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -203,5 +203,6 @@ results.innerHTML = found.map(g => <div class="gift"> <b>🎁 ${escapeHTML(g.gif
 }
 loadGifts();
 setInterval(loadGifts, 30000);
+</script>
 </body>
 </html>
