@@ -70,7 +70,13 @@ button{
 }
 
 .small{font-size:12px;color:#aaa;margin-top:5px}
-.gift{border-top:1px solid #30244b;padding:14px 0}
+.gift{
+ background:#211a35;
+ border:1px solid #30244b;
+ border-radius:12px;
+ padding:16px;
+ margin-bottom:16px;
+}
 .empty{color:#aaa;font-size:13px;text-align:center;padding:15px}
 nav{display:flex;justify-content:space-around;margin-top:25px;color:#aaa}
 nav span{font-size:12px;text-align:center}
@@ -181,15 +187,22 @@ const backdrop = g.backdrop || "Нет данных";
 const symbol = g.symbol || "Нет данных";
 
 return `
+ <div class="gift">
+  <strong>${escapeHTML(g.gift || "Неизвестный подарок")}</strong>
 
-<div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
+  <div class="small">ID: ${escapeHTML(g.giftId || "—")}</div>
 
-<div>🎨 Модель: ${escapeHTML(model)}</div>
-<div>🖼 Фон: ${escapeHTML(backdrop)}</div>
-<div>🔣 Символ: ${escapeHTML(symbol)}</div>
+  <br>
 
-<div class="small">${escapeHTML(getTime(g.at))}</div>
-  `;
+  <div>🎨 Модель: ${escapeHTML(model)}</div>
+  <div>🖼 Фон: ${escapeHTML(backdrop)}</div>
+  <div>🔣 Символ: ${escapeHTML(symbol)}</div>
+
+  <br>
+
+  <div class="small">${escapeHTML(getTime(g.at))}</div>
+ </div>
+`;
  }).join("");
 }
 
