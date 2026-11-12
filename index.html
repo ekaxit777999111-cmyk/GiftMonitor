@@ -238,7 +238,7 @@ async function searchGift() {
    return "Нет данных";
   }
 
-  return items.slice(0, 10).map(function(item) {
+  return items.map(function(item) {
    const rarity = item.rarity != null
     ? Number(item.rarity)
     : Number(item.rarityPermille || 0) / 10;
