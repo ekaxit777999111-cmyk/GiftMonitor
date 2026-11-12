@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiftMonitor</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#0b0914;color:white;
+ font-family:Arial,sans-serif;padding:22px;
+}
+header{display:flex;align-items:center;gap:12px}
+.logo{font-size:35px}
+h1{font-size:25px;margin:0}
+.sub{color:#aaa;font-size:13px;margin-top:5px}
+.card{
+ background:#171326;border:1px solid #30244b;
+ border-radius:17px;padding:18px;margin-top:20px;
+}
+h2{font-size:18px;margin:0 0 14px}
+input{
+ width:100%;padding:14px;border-radius:10px;
+ background:#0d0a18;border:1px solid #40315c;
+ color:white;font-size:15px;outline:none;
+}
+button{
+ width:100%;padding:14px;border:0;border-radius:10px;
+ background:#874cff;color:white;font-weight:bold;
+ font-size:15px;margin-top:12px;cursor:pointer;
+}
+.stats{display:flex;gap:10px}
+.stat{flex:1;background:#211a35;padding:14px;border-radius:12px}
+.number{font-size:23px;font-weight:bold;color:#b68cff}
+.small{font-size:12px;color:#aaa;margin-top:5px}
+.gift{border-top:1px solid #30244b;padding:14px 0}
+.empty{color:#aaa;font-size:13px;text-align:center;padding:15px}
+nav{display:flex;justify-content:space-around;margin-top:25px;color:#aaa}
+nav span{font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">🎁</div>
+<div>
+<h1>GiftMonitor</h1>
+<div class="sub">Telegram Gift Tracker</div>
+</div>
+</header>
+
+<div class="card">
+<h2>⚡ Мониторинг подарков</h2>
+<div class="stats">
+<div class="stat">
+<div class="number" id="total">0</div>
+<div class="small">Найдено подарков</div>
+</div>
+<div class="stat">
+<div class="number">ON</div>
+<div class="small">Статус приложения</div>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h2>🔍 Поиск подарка</h2>
+<input id="search" placeholder="Введи название или ID подарка">
+<button onclick="searchGift()">Найти подарок</button>
+<div id="results" class="empty">
+Ожидание данных мониторинга...
+</div>
+</div>
+
+<div class="card">
+<h2>🆕 Последние улучшения</h2>
+<div id="latest" class="empty">
+Пока нет найденных подарков
+</div>
+</div>
+
+<div class="card">
+<h2>👑 Premium</h2>
+<p class="sub">Расширенный мониторинг и уведомления</p>
+<button onclick="alert('Premium скоро появится!')">
+Подробнее о Premium
+</button>
+</div>
+
+<nav>
+<span>🏠<br>Главная</span>
+<span>🔍<br>Поиск</span>
+<span>🔔<br>Уведомления</span>
+<span>👤<br>Профиль</span>
+</nav>
+
+<script>
+function searchGift(){
+ const q=document.getElementById("search").value.trim();
+ document.getElementById("results").textContent=
+ q ? "Поиск: "+q+". Подключение базы данных ещё впереди."
+ : "Введи название или ID подарка.";
+}
+</script>
+</body>
+</html>
